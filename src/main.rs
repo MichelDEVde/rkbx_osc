@@ -128,8 +128,8 @@ impl Rekordbox {
 
     fn update(&mut self) {
         self.master_bpm = self.master_bpm_val.read();
-        self.beats1 = self.bar1_val.read() * 4 + self.beat1_val.read();
-        self.beats2 = self.bar2_val.read() * 4 + self.beat2_val.read();
+        self.beats1 = self.bar1_val.read() * 4 + self.beat1_val.read() - 5;
+        self.beats2 = self.bar2_val.read() * 4 + self.beat2_val.read() - 5;
         self.masterdeck_index = self.masterdeck_index_val.read();
 
         self.master_beats = if self.masterdeck_index == 0 {
@@ -371,39 +371,12 @@ Available versions:",
             socket.send(&packet[..]).unwrap();
         }
 
-        let beat_change = keeper.last_beat_index != keeper.beat_index;
-
         let msg = OscPacket::Message(OscMessage {
-            addr: "/beat_change".to_string(),
-            args: vec![OscType::Float(if beat_change {1.0} else {0.0})],
+            addr: "/timing".to_string(),
+            args: vec![OscType::Int(keeper.beat_index), OscType::Float(bfrac * max_value)],
         });
         let packet = encode(&msg).unwrap();
         socket.send(&packet[..]).unwrap();
-
-        let msg = OscPacket::Message(OscMessage {
-            addr: "/bar".to_string(),
-            args: vec![OscType::Float((((keeper.beat_index as f32) - 1.0) % 4.0) / 3.0)],
-        });
-        let packet = encode(&msg).unwrap();
-        socket.send(&packet[..]).unwrap();
-
-        if beat_change {
-            for i in 0..4 {
-                let value: f32 = if ((keeper.beat_index - 1) % 4) == i {
-                    max_value
-                } else {
-                    0.0
-                };
-
-                let msg = OscPacket::Message(OscMessage {
-                    addr: format!("{}{}", "/beat", i),
-                    args: vec![OscType::Float(value)],
-                });
-                let packet = encode(&msg).unwrap();
-                socket.send(&packet[..]).unwrap();
-            }
-        }
-
 
         while let Ok(key) = rx.try_recv() {
             match key {
