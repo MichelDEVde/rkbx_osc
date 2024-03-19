@@ -16,8 +16,8 @@ impl RekordboxOffsets {
                 deck2: 0x128,
                 bar: 0x1e18,
                 beat: 0x1e1c,
-                master_bpm: Offset::new(vec![0x4440260, 0xB98, 0x28, 0xF8], 0x48),
-                masterdeck_index: Offset::new(vec![0x043DBDD0, 0xE20, 0x278], 0x20),
+                master_bpm: Offset::new(vec![0x04440260, 0x48, 0xF8, 0x28], 0xB98),
+                masterdeck_index: Offset::new(vec![0x043DBDD0, 0x20, 0x278], 0xE20),
             }
         );
 
