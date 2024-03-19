@@ -406,7 +406,7 @@ Available versions:",
         if count % 10 == 0 {
             step = (step + 1) % 4;
 
-            let frac = (keeper.beat_index - 1) % 4;
+            let frac = keeper.beat_index % 4;
 
             print!(
                 "\rRunning {} [{}] Deck {}     Offset: {}ms     Frq: {}Hz    ",
