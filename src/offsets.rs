@@ -9,6 +9,19 @@ impl RekordboxOffsets {
         let mut map = HashMap::new();
 
         map.insert(
+            "6.8.3",
+            RekordboxOffsets {
+                beat_baseoffset: 0x0443F650,
+                deck1: 0x120,
+                deck2: 0x128,
+                bar: 0x1e18,
+                beat: 0x1e1c,
+                master_bpm: Offset::new(vec![0x4440260, 0xB98, 0x28, 0xF8], 0x48),
+                masterdeck_index: Offset::new(vec![0x043DBDD0, 0xE20, 0x278], 0x20),
+            }
+        );
+
+        map.insert(
             "6.8.2",
             RekordboxOffsets {
                 beat_baseoffset: 0x043FB790,

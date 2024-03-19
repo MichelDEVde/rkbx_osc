@@ -192,22 +192,31 @@ impl BeatKeeper {
                 self.beat_index = rb.master_beats;
                 self.beat_fraction = 0.;
             }
-            self.beat_fraction =
-                (self.beat_fraction + delta.as_micros() as f32 * beats_per_micro) % 1.;
+
+            self.beat_fraction += delta.as_micros() as f32 * beats_per_micro;
+
+            if self.beat_fraction > 1. {
+                self.beat_fraction = 1.
+            }
         } else {
             self.beat_fraction = (self.beat_fraction + delta.as_secs_f32() * 130. / 60.) % 1.;
         }
     }
     pub fn get_beat_faction(&mut self) -> f32 {
-        (self.beat_fraction
-            + if let Some(rb) = &self.rb {
-            let beats_per_micro = rb.master_bpm / 60. / 1000000.;
-            self.offset_micros * beats_per_micro
+        let fraction =
+            self.beat_fraction
+                + if let Some(rb) = &self.rb {
+                let beats_per_micro = rb.master_bpm / 60. / 1000000.;
+                self.offset_micros * beats_per_micro
+            } else {
+                0.
+            };
+
+        return if fraction > 1. {
+            1.
         } else {
-            0.
+            fraction
         }
-            + 1.)
-            % 1.
     }
 
     pub fn get_bpm_changed(&mut self) -> Option<f32> {
