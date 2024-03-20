@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 impl RekordboxOffsets {
     pub fn default_version() -> &'static str {
-        "6.8.2"
+        "6.8.3"
     }
 
     pub fn get_available_versions() -> HashMap<&'static str, RekordboxOffsets> {
