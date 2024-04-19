@@ -38,13 +38,14 @@ When a change occurs, the beat fraction is set to 0 and then counts linearly upw
 ## Supported versions
 Any version not listed will 99% not work, but you can always try using an adjacent version.
 
-| Rekordbox Version  | Verified? |
-| ----- | --- |
-| 6.8.3 | ✔️ |
-| 6.8.2 | ✔️ |
-| 6.7.7 | ✔️ |
-| 6.7.4 | ✔️ |
-| 6.7.3 | ✔️ |
+| Rekordbox Version | Verified? |
+|-------------------| --- |
+| 6.8.4             | ✔️ |
+| 6.8.3             | ✔️ |
+| 6.8.2             | ✔️ |
+| 6.7.7             | ✔️ |
+| 6.7.4             | ✔️ |
+| 6.7.3             | ✔️ |
 
 # Technical Details
 ## Updating
