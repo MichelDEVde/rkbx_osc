@@ -71,21 +71,11 @@ pub struct Rekordbox {
 
 impl Rekordbox {
     fn new(offsets: RekordboxOffsets) -> Self {
-        //println!("Hello, world!");
         let rb = Process::from_process_name("rekordbox.exe").unwrap();
         let h = rb.process_handle;
-        /*println!(
-            "process id = {}, \nprocess handle = {:?}",
-            rb.process_id, h
-        );*/
 
         let base = rb.get_module_base("rekordbox.exe").unwrap();
-        //base = 0x300905A4D;
-        //base = 0x266E1532160;
-        //println!("Base: {:X}", base);
-
         let master_bpm_val: Value<f32> = Value::new(h, base, offsets.master_bpm);
-        //println!("{}", master_bpm_val.read());
 
         let mut beats: Vec<i32> = vec![];
         let mut decks: Vec<Deck> = vec![];
@@ -112,10 +102,7 @@ impl Rekordbox {
             });
         }
 
-        // println!("{}.{}   {}.{}", bar1_val.read(), beat1_val.read(), bar2_val.read(), beat2_val.read());
-
         let masterdeck_index_val: Value<u8> = Value::new(h, base, offsets.masterdeck_index);
-        //println!("{}", masterdeck_index.read());
 
         Self {
             master_bpm_val,
@@ -350,7 +337,7 @@ Available versions:",
     let mut keeper = BeatKeeper::new(offsets.clone());
 
     // Due to Windows timers having a default resolution 0f 15.6ms, we need to use a "too high"
-    // value to acheive ~60Hz
+    // value to acheive >60Hz
     let period = Duration::from_micros(1000000 / 120);
 
     let mut last_instant = Instant::now();
