@@ -12,7 +12,8 @@ use toy_arms::external::{read, Process};
 use winapi::um::winnt::HANDLE;
 
 mod offsets;
-use offsets::{Offset, RekordboxOffsets};
+
+use offsets::{RekordboxOffsets};
 
 extern "C" {
     fn _getch() -> core::ffi::c_char;
@@ -29,14 +30,16 @@ struct Value<T> {
 }
 
 impl<T> Value<T> {
-    fn new(h: HANDLE, base: usize, offsets: Offset) -> Value<T> {
+    fn new(h: HANDLE, base: usize, mut offsets: Vec<usize>) -> Value<T> {
         let mut address = base;
 
-        for offset in offsets.offsets {
+        let last = offsets.pop().unwrap();
+
+        for offset in offsets {
             address = read::<usize>(h, address + offset)
                 .expect("Memory read failed, check your Rekordbox version!");
         }
-        address += offsets.final_offset;
+        address += last;
 
         Value::<T> {
             address,
@@ -50,16 +53,17 @@ impl<T> Value<T> {
     }
 }
 
+pub struct Deck {
+    bars: Value<i32>,
+    beats: Value<i32>,
+}
+
 pub struct Rekordbox {
     master_bpm_val: Value<f32>,
-    bar1_val: Value<i32>,
-    beat1_val: Value<i32>,
-    bar2_val: Value<i32>,
-    beat2_val: Value<i32>,
     masterdeck_index_val: Value<u8>,
+    decks: Vec<Deck>,
 
-    pub beats1: i32,
-    pub beats2: i32,
+    pub beats: Vec<i32>,
     pub master_beats: i32,
     pub master_bpm: f32,
     pub masterdeck_index: u8,
@@ -83,26 +87,30 @@ impl Rekordbox {
         let master_bpm_val: Value<f32> = Value::new(h, base, offsets.master_bpm);
         //println!("{}", master_bpm_val.read());
 
-        let bar1_val: Value<i32> = Value::new(
-            h,
-            base,
-            Offset::new(vec![offsets.beat_baseoffset, offsets.deck1], offsets.bar),
-        );
-        let beat1_val: Value<i32> = Value::new(
-            h,
-            base,
-            Offset::new(vec![offsets.beat_baseoffset, offsets.deck1], offsets.beat),
-        );
-        let bar2_val: Value<i32> = Value::new(
-            h,
-            base,
-            Offset::new(vec![offsets.beat_baseoffset, offsets.deck2], offsets.bar),
-        );
-        let beat2_val: Value<i32> = Value::new(
-            h,
-            base,
-            Offset::new(vec![offsets.beat_baseoffset, offsets.deck2], offsets.beat),
-        );
+        let mut beats: Vec<i32> = vec![];
+        let mut decks: Vec<Deck> = vec![];
+
+        for deck in offsets.decks {
+            let mut bar = vec![offsets.beat_baseoffset, deck];
+            let mut beat = vec![offsets.beat_baseoffset, deck];
+
+            bar.extend_from_slice(&offsets.bar);
+            beat.extend_from_slice(&offsets.beat);
+
+            beats.push(-1);
+            decks.push(Deck {
+                bars: Value::new(
+                    h,
+                    base,
+                    bar,
+                ),
+                beats: Value::new(
+                    h,
+                    base,
+                    beat,
+                ),
+            });
+        }
 
         // println!("{}.{}   {}.{}", bar1_val.read(), beat1_val.read(), bar2_val.read(), beat2_val.read());
 
@@ -111,15 +119,10 @@ impl Rekordbox {
 
         Self {
             master_bpm_val,
-            bar1_val,
-            beat1_val,
-            bar2_val,
-            beat2_val,
-
             masterdeck_index_val,
+            decks,
 
-            beats1: -1,
-            beats2: -1,
+            beats,
             master_bpm: 120.0,
             masterdeck_index: 0,
             master_beats: 0,
@@ -127,15 +130,17 @@ impl Rekordbox {
     }
 
     fn update(&mut self) {
-        self.master_bpm = self.master_bpm_val.read();
-        self.beats1 = self.bar1_val.read() * 4 + self.beat1_val.read() - 5;
-        self.beats2 = self.bar2_val.read() * 4 + self.beat2_val.read() - 5;
-        self.masterdeck_index = self.masterdeck_index_val.read();
+        for (pos, deck) in self.decks.iter().enumerate() {
+            self.beats[pos] = deck.bars.read() * 4 + deck.beats.read() - 5;
+        }
 
-        self.master_beats = if self.masterdeck_index == 0 {
-            self.beats1
+        self.masterdeck_index = self.masterdeck_index_val.read();
+        self.master_bpm = self.master_bpm_val.read();
+
+        self.master_beats = if self.masterdeck_index >= self.beats.len() as u8 {
+            0
         } else {
-            self.beats2
+            self.beats[self.masterdeck_index as usize]
         };
     }
 }
@@ -216,7 +221,7 @@ impl BeatKeeper {
             1.
         } else {
             fraction
-        }
+        };
     }
 
     pub fn get_bpm_changed(&mut self) -> Option<f32> {
