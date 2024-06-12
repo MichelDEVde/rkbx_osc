@@ -81,8 +81,11 @@ impl Rekordbox {
         let mut decks: Vec<Deck> = vec![];
 
         for deck in offsets.decks {
-            let mut bar = vec![offsets.beat_baseoffset, deck];
-            let mut beat = vec![offsets.beat_baseoffset, deck];
+            let mut bar = vec![offsets.beat_baseoffset];
+            let mut beat = vec![offsets.beat_baseoffset];
+
+            bar.extend_from_slice(&deck);
+            beat.extend_from_slice(&deck);
 
             bar.extend_from_slice(&offsets.bar);
             beat.extend_from_slice(&offsets.beat);
