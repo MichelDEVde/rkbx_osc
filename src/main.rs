@@ -224,6 +224,14 @@ impl BeatKeeper {
         None
     }
 
+    pub fn get_bpm(&mut self) -> f32 {
+        if let Some(rb) = &self.rb {
+            return rb.master_bpm;
+        }
+
+        0.0
+    }
+
     pub fn change_beat_offset(&mut self, offset: f32) {
         self.offset_micros += offset;
     }
@@ -377,7 +385,7 @@ Available versions:",
 
         let msg = OscPacket::Message(OscMessage {
             addr: "/timing".to_string(),
-            args: vec![OscType::Int(keeper.beat_index), OscType::Float(bfrac * max_value)],
+            args: vec![OscType::Int(keeper.beat_index), OscType::Float(bfrac * max_value), OscType::Float(keeper.get_bpm())],
         });
         let packet = encode(&msg).unwrap();
         socket.send(&packet[..]).unwrap();

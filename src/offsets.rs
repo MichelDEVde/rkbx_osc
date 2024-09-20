@@ -2,11 +2,35 @@ use std::collections::HashMap;
 
 impl RekordboxOffsets {
     pub fn default_version() -> &'static str {
-        "7.0.1"
+        "7.0.3"
     }
 
     pub fn get_available_versions() -> HashMap<&'static str, RekordboxOffsets> {
         let mut map = HashMap::new();
+
+        map.insert(
+            "7.0.3",
+            RekordboxOffsets {
+                beat_baseoffset: 0x05183D28,
+                decks: vec![vec![0x28, 0x0, 0x48], vec![0x28, 0x0, 0x50], vec![0x28, 0x8, 0x48], vec![0x28, 0x8, 0x50]],
+                bar: vec![0x2468],
+                beat: vec![0x246C],
+                master_bpm: vec![0x052D5C40, 0x40, 0x170, 0x28, 0xBA0],
+                masterdeck_index: vec![0x050D7CA8, 0x20, 0x278, 0x124],
+            }
+        );
+
+        map.insert(
+            "7.0.2",
+            RekordboxOffsets {
+                beat_baseoffset: 0x5139E60,
+                decks: vec![vec![0x28, 0x0, 0x48], vec![0x28, 0x0, 0x50], vec![0x28, 0x8, 0x48], vec![0x28, 0x8, 0x50]],
+                bar: vec![0x2468],
+                beat: vec![0x246C],
+                master_bpm: vec![0x5285D30, 0x40, 0x170, 0x28, 0xBA0],
+                masterdeck_index: vec![0x4FB9078 , 0x8, 0x2B0, 0x18],
+            }
+        );
 
         map.insert(
             "7.0.1",
